@@ -25,15 +25,14 @@ rbatchip: rbatchip.c register_clnt.o
 rbatchipd: rbatchipd.c register_svc.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-register.h: register.x
+register.h register_clnt.c register_svc.c: register.x
 	rpcgen -C $^
 
 register_clnt.o: register.h register_clnt.c
 register_svc.o: register.h register_svc.c
 
-%.o: %.c
+%.o: %.c register.h
 	$(CC) $(CFLAGS) -c -o $@ $<
-.SECONDARY: register_clnt.o register_svc.o
 
 clean:
-	rm -f register.h *.o rbatchip rbatchipd
+	rm -f register.h *.o rbatchip rbatchipd register_clnt.c register_svc.c

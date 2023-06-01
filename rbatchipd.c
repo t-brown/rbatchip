@@ -73,12 +73,12 @@ register_1_svc(char **msg, struct svc_req *rq)
 		id = strtol(tmp, NULL, 10);
 	}
 #ifdef DEBUG
-	printf("local AWS_BATCH_JOB_ID: %d\n", id);
+	printf("server AWS_BATCH_JOB_ID: %d\n", id);
 #endif
 
 	rid = strtol(*msg, NULL, 10);
 #ifdef DEBUG
-	printf("remote AWS_BATCH_JOB_ID: %d\n", rid);
+	printf("client AWS_BATCH_JOB_ID: %d\n", rid);
 #endif
 	if (rid != id) {
 		result = 0;
@@ -104,14 +104,9 @@ register_1_svc(char **msg, struct svc_req *rq)
 	tmp = inet_ntoa((rq->rq_xprt->xp_raddr).sin_addr);
 	printf("remote IP: %s\n", tmp);
 #endif
-
 	fprintf(f, "%s\n", inet_ntoa((rq->rq_xprt->xp_raddr).sin_addr));
-	/*
-	fprintf(f, "%s\n", inet_ntoa((rq->rq_xprt->xp_raddr.sin_addr).s_addr));
-	addr = svc_getcaller(rq->rq_xprt);
-	fprintf(f, "%s\n", inet_ntoa(((sockaddr_in)addr).sin_addr));
-	*/
 	fclose(f);
+	free(hostfile);
 	result = 1;
 	return &result;
 }
