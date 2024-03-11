@@ -1,5 +1,5 @@
 
-CC = cc
+CC ?= cc
 CFLAGS  = -fPIC -DDEBUG
 
 .PHONY:
