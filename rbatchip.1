@@ -45,12 +45,13 @@ The
 utility sends to
 .NM rbatchipd
 the
-.Ev AWS_BATCH_JOB_ID .
-It's primary function is to provide the IP address of the AWS Batch
-compute node, so as to be able to build an MPI hosts file.
+.Ev AWS_BATCH_JOB_ID
+and the number of CPUs online (_SC_NPROCESSORS_ONLN).
+It's primary function is to provide the IP address and number of CPUs
+of the current AWS Batch compute node, so as to be able to build an MPI hosts file.
 .Sh SEE ALSO
 .Xr rpc 3n ,
-.Xr rbatchip 1
+.Xr rbatchipd 1
 .Sh AUTHORS
 The
 .Nm

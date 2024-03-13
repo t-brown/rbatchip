@@ -30,9 +30,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+struct info {
+	int nslots;
+	int jobid;
+};
+
+typedef struct info info;
+
 program RBATCHIPPROG {
 	version RBATCHIPVERS {
-		int REGISTER(string) = 1;
+		int REGISTER(info) = 1;
 	} = 1;
 } = 0x2000000f;
 

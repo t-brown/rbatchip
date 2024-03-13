@@ -42,7 +42,7 @@
 #include "register.h"
 
 int *
-register_1_svc(char **msg, struct svc_req *rq)
+register_1_svc(info *msg, struct svc_req *rq)
 {
 	static int nnodes = 0;
 	static int id = -1;
@@ -76,7 +76,7 @@ register_1_svc(char **msg, struct svc_req *rq)
 	printf("server AWS_BATCH_JOB_ID: %d\n", id);
 #endif
 
-	rid = strtol(*msg, NULL, 10);
+	rid = msg->jobid;
 #ifdef DEBUG
 	printf("client AWS_BATCH_JOB_ID: %d\n", rid);
 #endif
@@ -104,7 +104,7 @@ register_1_svc(char **msg, struct svc_req *rq)
 	tmp = inet_ntoa((rq->rq_xprt->xp_raddr).sin_addr);
 	printf("remote IP: %s\n", tmp);
 #endif
-	fprintf(f, "%s\n", inet_ntoa((rq->rq_xprt->xp_raddr).sin_addr));
+	fprintf(f, "%s slots=%d\n", inet_ntoa((rq->rq_xprt->xp_raddr).sin_addr), msg->nslots);
 	fclose(f);
 	free(hostfile);
 	result = 1;

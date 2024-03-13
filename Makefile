@@ -1,6 +1,6 @@
 
 CC ?= cc
-CFLAGS  = -fPIC -DDEBUG
+CFLAGS  = -fPIC
 
 .PHONY:
 .PHONY: all clean install
@@ -20,20 +20,20 @@ install: all
 	install -d $(MANDIR)
 	install -m 644 rbatchip.1 rbatchipd.1 $(MANDIR)
 
-rbatchip: rbatchip.c register_clnt.o
+rbatchip: rbatchip.c register_clnt.o register_xdr.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-rbatchipd: rbatchipd.c register_svc.o
+rbatchipd: rbatchipd.c register_svc.o register_xdr.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-register.h register_clnt.c register_svc.c: register.x
+register.h register_clnt.c register_svc.c register_xdr.c: register.x
 	rpcgen -C $^
 
-register_clnt.o: register.h register_clnt.c
-register_svc.o: register.h register_svc.c
+register_clnt.o: register.h register_clnt.c register_xdr.o
+register_svc.o: register.h register_svc.c register_xdr.o
 
 %.o: %.c register.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f register.h *.o rbatchip rbatchipd register_clnt.c register_svc.c
+	rm -f register.h *.o rbatchip rbatchipd register_clnt.c register_svc.c register_xdr.c

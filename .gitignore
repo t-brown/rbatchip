@@ -3,4 +3,4 @@ register_clnt.c
 register_clnt.o
 register_svc.c
 register_svc.o
-
+register_xdr.c

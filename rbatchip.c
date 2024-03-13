@@ -30,46 +30,57 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define _XOPEN_SOURCE 900
+#if 0
+#define _XOPEN_SOURCE 700
+#endif
 
 #include <err.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sysexits.h>
 #include <rpc/rpc.h>
+#include <unistd.h>
 #include "register.h"
+
+char *
+get_env(char *key)
+{
+	char *value = NULL;
+
+	value = getenv(key);
+	if (!value) {
+		errx(EX_NOHOST, "unable to retrieve %s", key);
+	}
+#ifdef DEBUG
+	printf("%s: %s\n", key, value);
+#endif
+	return value;
+}
 
 int
 main(int argc, char **argv)
 {
 	CLIENT *cl = NULL;
 	int *result = NULL;
-	char *server =NULL;
+	int nprocs = 0;
+	char *server = NULL;
 	char *id = NULL;
+	info msg = {0};
 
 	/* Get the IP of the main node */
-	server = getenv("AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS");
-	if (!server) {
-		errx(EX_NOHOST, "unable to retrieve AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS");
-	}
-#ifdef DEBUG
-	printf("AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS: %s\n", server);
-#endif
-
-	id = getenv("AWS_BATCH_JOB_ID");
-	if (!id) {
-		errx(EX_SOFTWARE, "unable to retrieve AWS_BATCH_JOB_ID");
-	}
-#ifdef DEBUG
-	printf("AWS_BATCH_JOB_ID: %s\n", id);
-#endif
+	server = get_env("AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS");
+	id = get_env("AWS_BATCH_JOB_ID");
 
 	cl = clnt_create(server, RBATCHIPPROG, RBATCHIPVERS, "tcp");
 	if (!cl) {
 		clnt_pcreateerror(server);
 		exit(1);
 	}
-	result = register_1(&id, cl);
+
+	msg.nslots = sysconf(_SC_NPROCESSORS_ONLN);
+	msg.jobid = strtol(id, NULL, 10);
+	
+	result = register_1(&msg, cl);
 	if (!result) {
 		clnt_perror(cl, server);
 		exit(1);
