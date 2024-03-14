@@ -30,9 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if 0
-#define _XOPEN_SOURCE 700
-#endif
+#define _XOPEN_SOURCE 900
 
 #include <err.h>
 #include <stdlib.h>
@@ -49,7 +47,7 @@ get_env(char *key)
 
 	value = getenv(key);
 	if (!value) {
-		errx(EX_NOHOST, "unable to retrieve %s", key);
+		warnx("unable to retrieve %s", key);
 	}
 #ifdef DEBUG
 	printf("%s: %s\n", key, value);
@@ -63,10 +61,14 @@ main(int argc, char **argv)
 	CLIENT *cl = NULL;
 	int *result = NULL;
 	int nprocs = 0;
+	int omp = 0;
 	char *server = NULL;
 	char *id = NULL;
 	info msg = {0};
 
+	/* Get the number of threads */
+	omp = strtol(get_env("OMP_NUM_THREADS"), NULL, 10);
+	
 	/* Get the IP of the main node */
 	server = get_env("AWS_BATCH_JOB_MAIN_NODE_PRIVATE_IPV4_ADDRESS");
 	id = get_env("AWS_BATCH_JOB_ID");
@@ -78,6 +80,9 @@ main(int argc, char **argv)
 	}
 
 	msg.nslots = sysconf(_SC_NPROCESSORS_ONLN);
+	if (omp != 0) {
+		msg.nslots = msg.nslots/omp;
+	}
 	msg.jobid = strtol(id, NULL, 10);
 	
 	result = register_1(&msg, cl);
