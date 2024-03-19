@@ -1,6 +1,6 @@
 
 CC ?= cc
-CFLAGS  = -fPIC
+CFLAGS  += -fPIC
 
 .PHONY:
 .PHONY: all clean install
