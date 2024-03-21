@@ -20,14 +20,14 @@ install: all
 	install -d $(MANDIR)
 	install -m 644 rbatchip.1 rbatchipd.1 $(MANDIR)
 
-rbatchip: rbatchip.c register_clnt.o register_xdr.o
-	$(CC) $(CFLAGS) -o $@ $^
+rbatchip: rbatchip.c register_clnt.o register_xdr.o get_env.o
+	$(CC) $(CFLAGS) -o $@ $(LDFLAGS) $^
 
-rbatchipd: rbatchipd.c register_svc.o register_xdr.o
-	$(CC) $(CFLAGS) -o $@ $^
+rbatchipd: rbatchipd.c register_svc.o register_xdr.o get_env.o
+	$(CC) $(CFLAGS) -o $@ $(LDFLAGS) $^
 
 register.h register_clnt.c register_svc.c register_xdr.c: register.x
-	rpcgen -C $^
+	rpcgen $^
 
 register_clnt.o: register.h register_clnt.c register_xdr.o
 register_svc.o: register.h register_svc.c register_xdr.o

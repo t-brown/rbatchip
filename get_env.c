@@ -32,89 +32,22 @@
 
 #define _XOPEN_SOURCE 900
 
-#include <arpa/inet.h>
 #include <err.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sysexits.h>
-#include <string.h>
-#include <rpc/rpc.h>
-#include "register.h"
-#include "get_env.h"
 
-int *
-register_1_svc(info *msg, struct svc_req *rq)
+char *
+get_env(char *key)
 {
-	static int nnodes = 0;
-	static int id = -1;
-	static int result = 0;
-	int rid = -1;
-	int i = 0;
-	struct sockaddr *addr = NULL;
-	struct sockaddr_in *sin = NULL;
-	struct sockaddr_in6 *sin6 = NULL;
-	char *home_dir = NULL;
-	char *ip = NULL;
-	char *hostfile = NULL;
-	FILE *f = NULL;
+	char *value = NULL;
 
-	if (nnodes == 0) {
-		nnodes = strtol(getenv("AWS_BATCH_JOB_NUM_NODES"), NULL, 10);
+	value = getenv(key);
+	if (!value) {
+		errx(EX_UNAVAILABLE, "unable to retrieve %s", key);
 	}
 #ifdef DEBUG
-	printf("AWS_BATCH_JOB_NUM_NODES: %d\n", nnodes);
+	printf("%s: %s\n", key, value);
 #endif
-
-	if (id == -1) {
-		id = strtol(getenv("AWS_BATCH_JOB_ID"), NULL, 10);
-	}
-#ifdef DEBUG
-	printf("server AWS_BATCH_JOB_ID: %d\n", id);
-#endif
-
-	rid = msg->jobid;
-#ifdef DEBUG
-	printf("client AWS_BATCH_JOB_ID: %d\n", rid);
-#endif
-	if (rid != id) {
-		result = 0;
-		return &result;
-	}
-
-	home_dir = get_env("HOME");
-	i = strlen(home_dir) + strlen("hostfile") + 2;
-	hostfile = malloc(i);
-	snprintf(hostfile, i, "%s/%s", home_dir, "hostfile");
-#ifdef DEBUG
-	printf("Hostfile: %s\n", hostfile);
-#endif
-
-	addr = (struct sockaddr *)svc_getrpccaller(rq->rq_xprt)->buf;
-	switch (addr->sa_family) {
-		case AF_INET:
-			sin = (struct sockaddr_in *)addr;
-			inet_ntop(AF_INET, &(sin->sin_addr), ip, INET_ADDRSTRLEN);
-		case AF_INET6:
-			sin6 = (struct sockaddr_in6 *)addr;
-			inet_ntop(AF_INET6, &(sin6->sin6_addr), ip, INET6_ADDRSTRLEN);
-		case AF_LOCAL:
-			break;
-		default:
-			break;
-	}
-#ifdef DEBUG
-	printf("remote IP: %s\n", ip);
-#endif
-
-	f = fopen(hostfile, "a");
-	if (!f) {
-		result = 0;
-		return &result;
-	}
-	fprintf(f, "%s slots=%d\n", ip, msg->nslots);
-	fclose(f);
-	free(hostfile);
-	result = 1;
-	return &result;
+	return value;
 }
-
