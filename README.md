@@ -14,6 +14,9 @@ node that will be participating in the job.
 
 +  [C compiler](https://gcc.gnu.org/)
 +  [rpcgen](https://en.wikipedia.org/wiki/RPCGEN)
++  [make](https://www.gnu.org/software/make/)
+
+Also if on a recent GNU libc you will need [libtirpc](https://sourceforge.net/projects/libtirpc/).
 
 ## Building / Installation
 
